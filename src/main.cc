@@ -1,4 +1,4 @@
-#include <vector>
+//#include <vector>
 
 #include "myclass.hpp"
 
@@ -13,6 +13,9 @@ public:
   T value_;
 };
 
+class RegularClass {
+};
+
 template class TemplateClass<int, class jim::MyClass<float>>;
 
 int main(int argc, char **argv) {
@@ -23,6 +26,9 @@ int main(int argc, char **argv) {
   double d = 10;
   double c = add(d, d);
   d = c;
+
+  RegularClass reg;
+  (void) reg;
 
   TemplateClass<int, jim::MyClass<float>> ti;
   ti.GetValue();
@@ -36,8 +42,8 @@ int main(int argc, char **argv) {
     mc.value_ = 40;
   }
 
-  std::vector<int> ivec;
-  ivec.push_back(10);
+//  std::vector<int> ivec;
+//  ivec.push_back(10);
 
   return 0;
 }
