@@ -20,15 +20,28 @@ using namespace clang::tooling;
 
 static llvm::cl::OptionCategory MatcherSampleCategory("Matcher Sample");
 
-class IfStmtHandler : public MatchFinder::MatchCallback {
+class CXXConstructExprHandler : public MatchFinder::MatchCallback {
 public:
-  IfStmtHandler() {}
+  CXXConstructExprHandler() {}
 
   virtual void run(const MatchFinder::MatchResult &Result) {
-    // The matched 'if' statement was bound to 'ifStmt'.
-    if (const IfStmt *IfS = Result.Nodes.getNodeAs<clang::IfStmt>("ifStmt")) {
-      (void)IfS;
-      std::cout << "Found an if" << std::endl;
+    // The matched 'if' statement was bound to 'CXXConstructExpr'.
+    if (const ClassTemplateSpecializationDecl *crd =
+        Result.Nodes.getNodeAs<ClassTemplateSpecializationDecl>("template_instantiation")) {
+      std::cout << "Found a template instantiation" << std::endl;
+
+      ClassTemplateDecl *ctd = crd->getSpecializedTemplate();
+      std::cout << ctd->getQualifiedNameAsString() << std::endl;
+
+      auto& template_args = crd->getTemplateArgs();
+      for (size_t i = 0; i != template_args.size(); ++i) {
+        auto& arg = template_args[i];
+        auto type = arg.getAsType();
+        std::cout << type.getAsString() << std::endl;
+      }
+
+      //crd->dumpColor();
+      std::cout << std::endl;
     }
   }
 };
@@ -42,7 +55,8 @@ public:
     HandlerForIf()
   {
     // Add a simple matcher for finding 'if' statements.
-    Matcher.addMatcher(ifStmt().bind("ifStmt"), &HandlerForIf);
+    //Matcher.addMatcher(constructExpr().bind("template_instantiation"), &HandlerForIf);
+    Matcher.addMatcher(classTemplateSpecializationDecl().bind("template_instantiation"), &HandlerForIf);
   }
 
   void HandleTranslationUnit(ASTContext &Context) override {
@@ -51,7 +65,7 @@ public:
   }
 
 private:
-  IfStmtHandler HandlerForIf;
+  CXXConstructExprHandler HandlerForIf;
   MatchFinder Matcher;
 };
 

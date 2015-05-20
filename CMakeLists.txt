@@ -1,4 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
+
+set (CMAKE_C_COMPILER "/usr/local/bin/clang")
+set (CMAKE_CXX_COMPILER "/usr/local/bin/clang++")
+
 set (PROJECT_NAME MyProject)
 project (${PROJECT_NAME})
 
@@ -6,22 +10,12 @@ project (${PROJECT_NAME})
 option (USE_GLIBCXX_DEBUG 
   "Use the _GLIBCXX_DEBUG macro for nicer debugging and error checking of the c++ standard library.  Warning, it breaks ABI compatibility so don't pass container instantiations between translation units that don't have the same debug mode."
   OFF)
-## USE_MY_LIBRARY in source.
-#option (USE_MY_LIBRARY
-#        "Use the provided library" ON)
-
-SET (CMAKE_C_COMPILER             "clang")
-SET (CMAKE_CXX_COMPILER             "clang++")
 
 ## Support for Clang's CompilationDatabase system
 set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
-## Compile and create a library.  STATIC is default unless BUILD_SHARED_LIBS
-## is on.
-
 add_executable (${PROJECT_NAME} 
   src/main.cc
-  src/template_instances.cc
   )
 target_link_libraries (${PROJECT_NAME} ${LIBS})
 
@@ -58,9 +52,6 @@ target_link_libraries (extract-templates
   clangToolingCore clangTooling LLVMCore LLVMMCParser LLVMMC LLVMOption
   LLVMSupport rt dl tinfo pthread z m
   )
-
-
-
 
 # Compile flags
 SET (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")

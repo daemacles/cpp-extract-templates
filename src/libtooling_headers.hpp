@@ -1,6 +1,7 @@
 #pragma once
 
 #include "clang/AST/AST.h"
+#include "clang/AST/ASTContext.h"
 #include "clang/AST/ASTConsumer.h"
 #include "clang/ASTMatchers/ASTMatchers.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"

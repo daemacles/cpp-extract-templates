@@ -1,8 +1,3 @@
-//#include <iostream>
-//#include <vector>
-
-//#include "TextComponent.hpp"
-
 #include "myclass.hpp"
 
 #include "extern_templates.hpp"
@@ -16,6 +11,8 @@ public:
   T value_;
 };
 
+template class TemplateClass<int, class jim::MyClass<float>>;
+
 int main(int argc, char **argv) {
   // DELETE THESE.  Used to suppress unused variable warnings.
   (void)argc;
@@ -25,7 +22,7 @@ int main(int argc, char **argv) {
   double c = add(d, d);
   d = c;
 
-  TemplateClass<int, float> ti;
+  TemplateClass<int, jim::MyClass<float>> ti;
   ti.GetValue();
 
   jim::MyClass<char> mc;
