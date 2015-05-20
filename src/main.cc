@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "myclass.hpp"
 
 #include "extern_templates.hpp"
@@ -33,6 +35,9 @@ int main(int argc, char **argv) {
   if (argc > 2) {
     mc.value_ = 40;
   }
+
+  std::vector<int> ivec;
+  ivec.push_back(10);
 
   return 0;
 }
