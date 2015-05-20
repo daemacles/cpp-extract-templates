@@ -10,30 +10,57 @@ option (USE_GLIBCXX_DEBUG
 #option (USE_MY_LIBRARY
 #        "Use the provided library" ON)
 
-SET (CMAKE_C_COMPILER             "/usr/bin/clang-3.5")
-SET (CMAKE_CXX_COMPILER             "/usr/bin/clang++-3.5")
+SET (CMAKE_C_COMPILER             "clang")
+SET (CMAKE_CXX_COMPILER             "clang++")
 
 ## Support for Clang's CompilationDatabase system
 set (CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 ## Compile and create a library.  STATIC is default unless BUILD_SHARED_LIBS
 ## is on.
-#add_library (LibraryName src/sources.cc)
 
-#if (USE_MY_LIBRARY)
-  ## Search for include files here as well
-  #include_directories ("{PROJECT_SOURCE_DIR}/some_sub_path")
+add_executable (${PROJECT_NAME} 
+  src/main.cc
+  src/template_instances.cc
+  )
+target_link_libraries (${PROJECT_NAME} ${LIBS})
 
-  ## Run Cmake also in this dir
-  #add_subdirectory (some_sub_path)
+### EXTRACT TEMPLATES
+add_custom_command (OUTPUT libtooling_headers.hpp.pch
+  COMMAND clang++ 
+  ARGS -x c++-header -std=c++11 -fno-rtti
+  -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
+  ${CMAKE_HOME_DIRECTORY}/src/libtooling_headers.hpp 
+  -o libtooling_headers.hpp.pch 
+  DEPENDS ${CMAKE_HOME_DIRECTORY}/src/libtooling_headers.hpp
+  VERBATIM
+  )
 
-  #set (EXTRA_LIBS ${EXTRA_LIBS} LibraryName)
-#endif (USE_MY_LIBRARY)
+add_executable (extract-templates
+  src/extract_templates.cc
+  )
 
-#set (LIBS LibraryName...)
+set_source_files_properties (src/extract_templates.cc
+  PROPERTIES 
+  COMPILE_FLAGS "-include libtooling_headers.hpp -Wno-unused-parameter -I/usr/local/src/clang-llmv/llvm/include -I/usr/local/src/clang-llmv/build/include -I/usr/local/src/clang-llmv/llvm/tools/clang/include -I/usr/local/src/clang-llmv/build/tools/clang/include -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS"
+  OBJECT_DEPENDS libtooling_headers.hpp.pch
+  )
+set_target_properties (extract-templates
+  PROPERTIES
+  LINK_FLAGS "-L/usr/local/src/clang/build/lib"
+  )
 
-add_executable (${PROJECT_NAME} src/main.cc)
-target_link_libraries (${PROJECT_NAME} ${EXTRA_LIBS} ${LIBS})
+target_link_libraries (extract-templates 
+  clangAST clangAnalysis clangBasic clangDriver clangEdit clangFrontend
+  clangFrontendTool clangLex clangParse clangSema clangEdit clangASTMatchers
+  clangRewrite clangRewriteFrontend clangStaticAnalyzerFrontend
+  clangStaticAnalyzerCheckers clangStaticAnalyzerCore clangSerialization
+  clangToolingCore clangTooling LLVMCore LLVMMCParser LLVMMC LLVMOption
+  LLVMSupport rt dl tinfo pthread z m
+  )
+
+
+
 
 # Compile flags
 SET (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
@@ -42,7 +69,7 @@ SET (CMAKE_C_FLAGS_MINSIZEREL     "${CMAKE_CFLAGS} -Os -DNDEBUG")
 SET (CMAKE_C_FLAGS_RELEASE        "${CMAKE_CFLAGS} -O3 -DNDEBUG")
 SET (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CFLAGS} -O2 -g")
 
-SET (CMAKE_CXX_FLAGS                "-Wall -std=c++11 -Wextra -Werror")
+SET (CMAKE_CXX_FLAGS                "-Wall -fno-rtti -std=c++11 -Wextra -Werror")
 SET (CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXXFLAGS} -g")
 SET (CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXXFLAGS} -Os -DNDEBUG")
 SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXXFLAGS} -O2 -g")
