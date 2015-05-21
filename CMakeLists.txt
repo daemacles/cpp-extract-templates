@@ -6,6 +6,19 @@ set (CMAKE_CXX_COMPILER "/usr/local/bin/clang++")
 set (PROJECT_NAME MyProject)
 project (${PROJECT_NAME})
 
+# Compile flags
+SET (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
+SET (CMAKE_C_FLAGS_DEBUG          "${CMAKE_CFLAGS} -g")
+SET (CMAKE_C_FLAGS_MINSIZEREL     "${CMAKE_CFLAGS} -Os -DNDEBUG")
+SET (CMAKE_C_FLAGS_RELEASE        "${CMAKE_CFLAGS} -O3 -DNDEBUG")
+SET (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CFLAGS} -O2 -g")
+
+SET (CMAKE_CXX_FLAGS                "-Wall -fno-rtti -std=c++11 -Wextra -Werror")
+SET (CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXXFLAGS} -g")
+SET (CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXXFLAGS} -Os -DNDEBUG")
+SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXXFLAGS} -O2 -g")
+SET (CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXXFLAGS} -O3 -DNDEBUG")
+
 ## Set optional features.  This will show up as a preprocessor variable
 option (USE_GLIBCXX_DEBUG 
   "Use the _GLIBCXX_DEBUG macro for nicer debugging and error checking of the c++ standard library.  Warning, it breaks ABI compatibility so don't pass container instantiations between translation units that don't have the same debug mode."
@@ -20,9 +33,20 @@ add_executable (${PROJECT_NAME}
 target_link_libraries (${PROJECT_NAME} ${LIBS})
 
 ### EXTRACT TEMPLATES
+string(TOUPPER ${CMAKE_BUILD_TYPE} DEBUG_MODE)
+if (DEBUG_MODE MATCHES "DEBUG")
+  set (PCH_FLAGS -O0)
+elseif (DEBUG_MODE MATCHES "RELEASE")
+  set (PCH_FLAGS -O3)
+elseif (DEBUG_MODE MATCHES "RELWITHDEBINFO")
+  set (PCH_FLAGS -O2 -g)
+elseif (DEBUG_MODE MATCHES "MINSIZEREL")
+  set (PCH_FLAGS -Os)
+endif (DEBUG_MODE MATCHES "DEBUG")
+
 add_custom_command (OUTPUT libtooling_headers.hpp.pch
   COMMAND clang++ 
-  ARGS -x c++-header -std=c++11 -fno-rtti
+  ARGS -x c++-header -std=c++11 ${PCH_FLAGS} -fno-rtti
   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
   ${CMAKE_HOME_DIRECTORY}/src/libtooling_headers.hpp 
   -o libtooling_headers.hpp.pch 
@@ -44,27 +68,45 @@ set_target_properties (extract-templates
   LINK_FLAGS "-L/usr/local/src/clang/build/lib"
   )
 
+set (UNUSED_LIBS
+clangAnalysis
+clangDriver
+clangEdit
+clangFrontendTool
+clangLex
+clangParse
+clangSema
+clangEdit
+clangRewrite
+clangRewriteFrontend
+clangStaticAnalyzerFrontend
+clangStaticAnalyzerCheckers
+clangStaticAnalyzerCore
+clangSerialization
+clangToolingCore
+LLVMCore
+LLVMMCParser
+LLVMMC
+LLVMOption
+)
+
 target_link_libraries (extract-templates 
-  clangAST clangAnalysis clangBasic clangDriver clangEdit clangFrontend
-  clangFrontendTool clangLex clangParse clangSema clangEdit clangASTMatchers
-  clangRewrite clangRewriteFrontend clangStaticAnalyzerFrontend
-  clangStaticAnalyzerCheckers clangStaticAnalyzerCore clangSerialization
-  clangToolingCore clangTooling LLVMCore LLVMMCParser LLVMMC LLVMOption
-  LLVMSupport rt dl tinfo pthread z m
+
+clangTooling
+clangBasic
+clangASTMatchers
+clangAST
+clangFrontend
+LLVMSupport
+
+rt
+dl
+tinfo
+pthread
+z
+m
   )
 
-# Compile flags
-SET (CMAKE_C_FLAGS                "-Wall -std=c11 -Wextra -Werror")
-SET (CMAKE_C_FLAGS_DEBUG          "${CMAKE_CFLAGS} -g")
-SET (CMAKE_C_FLAGS_MINSIZEREL     "${CMAKE_CFLAGS} -Os -DNDEBUG")
-SET (CMAKE_C_FLAGS_RELEASE        "${CMAKE_CFLAGS} -O3 -DNDEBUG")
-SET (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CFLAGS} -O2 -g")
-
-SET (CMAKE_CXX_FLAGS                "-Wall -fno-rtti -std=c++11 -Wextra -Werror")
-SET (CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXXFLAGS} -g")
-SET (CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXXFLAGS} -Os -DNDEBUG")
-SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXXFLAGS} -O2 -g")
-SET (CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXXFLAGS} -O3 -DNDEBUG")
 
 if (USE_GLIBCXX_DEBUG)
   # Prefer using G++ for debug mode because the GLIBCXX_DEBUG flag for pretty
