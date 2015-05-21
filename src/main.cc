@@ -1,4 +1,4 @@
-//#include <vector>
+#include <vector>
 
 #include "myclass.hpp"
 
@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
     mc.value_ = 40;
   }
 
-//  std::vector<int> ivec;
-//  ivec.push_back(10);
+  std::vector<int> ivec;
+  ivec.push_back(10);
 
   return 0;
 }

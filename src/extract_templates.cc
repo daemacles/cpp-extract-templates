@@ -28,30 +28,53 @@ public:
   CXXConstructExprHandler() : context_(nullptr) {}
 
   virtual void run(const MatchFinder::MatchResult &Result) {
-    // The matched 'if' statement was bound to 'CXXConstructExpr'.
+    // The matched statement was bound to 'CXXConstructExpr'.
     if (const CXXConstructExpr *match =
         Result.Nodes.getNodeAs<CXXConstructExpr>("construction")) {
+      //match->dumpColor();
       auto &source_manager = context_->getSourceManager();
       auto location = match->getLocation();
+
+      // Check that the constructor was called from the main source file (and
+      // not, e.g. from something included or generated).
       if (source_manager.isInMainFile(location)) {
-        std::cout << "Found a class instantiation at "
-          << match->getExprLoc().printToString(context_->getSourceManager())
-          << std::endl;
-        match->dumpColor();
         QualType qual_type = match->getType();
-        std::cout << "QualType is " << qual_type.getAsString() << std::endl;
-        if (CXXRecordDecl *match_decl =
-            qual_type.getTypePtr()->getAsCXXRecordDecl()) {
-          std::cout << "CXXRecordDecl is " << match_decl->getNameAsString()
-            << std::endl;
-          if (ClassTemplateDecl *match_template_decl =
-              match_decl->getDescribedClassTemplate()) {
-            std::cout << "And the template is "
-              << match_template_decl->getNameAsString() << std::endl;
+
+        // Check that the constructor's origin can be traced back to a
+        // template class.
+        if (const CXXRecordDecl *match_declaration =
+            qual_type
+            .getTypePtr()
+            ->getAsCXXRecordDecl()
+            ->getTemplateInstantiationPattern()) {
+          if (const ClassTemplateDecl *match_template_declaration =
+              match_declaration
+              ->getDescribedClassTemplate()) {
+            std::cout << "Found a class instantiation at "
+              << match->getExprLoc().printToString(context_->getSourceManager())
+              << std::endl;
+            std::cout << "QualType is " << qual_type.getAsString() << std::endl;
+            std::cout << "CXXRecordDecl is "
+              << match_declaration->getNameAsString()
+              << std::endl;
+            std::cout << "ClassTemplateDecl is "
+              << match_template_declaration->getNameAsString()
+              << " located at "
+              << match_template_declaration
+                 ->getLocation().printToString(context_->getSourceManager())
+              << std::endl;
+            auto param_list =
+              match_template_declaration->getTemplateParameters();
+            size_t num_params = param_list->size();
+            for (size_t idx=0; idx != num_params; ++idx) {
+              auto param = param_list->getParam(idx);
+              std::cout << " - Parameter " << idx+1 << " : "
+                << param->getNameAsString() << std::endl;
+            }
+            std::cout << std::endl;
           }
         }
 
-        std::cout << std::endl;
       }
 
 //      ClassTemplateDecl *ctd = match->getSpecializedTemplate();
