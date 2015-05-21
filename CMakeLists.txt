@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 
 set (CMAKE_C_COMPILER "/usr/local/bin/clang")
 set (CMAKE_CXX_COMPILER "/usr/local/bin/clang++")
+#set (CMAKE_C_COMPILER "clang-3.5")
+#set (CMAKE_CXX_COMPILER "clang++-3.5")
 
 set (PROJECT_NAME MyProject)
 project (${PROJECT_NAME})
@@ -69,42 +71,35 @@ set_target_properties (extract-templates
   )
 
 set (UNUSED_LIBS
-clangAnalysis
-clangDriver
-clangEdit
-clangFrontendTool
-clangLex
-clangParse
-clangSema
-clangEdit
-clangRewrite
-clangRewriteFrontend
-clangStaticAnalyzerFrontend
-clangStaticAnalyzerCheckers
-clangStaticAnalyzerCore
-clangSerialization
-clangToolingCore
-LLVMCore
-LLVMMCParser
-LLVMMC
-LLVMOption
+  clangAnalysis
+  clangDriver
+  clangEdit
+  clangFrontendTool
+  clangLex
+  clangParse
+  clangSema
+  clangEdit
+  clangRewrite
+  clangRewriteFrontend
+  clangStaticAnalyzerFrontend
+  clangStaticAnalyzerCheckers
+  clangStaticAnalyzerCore
+  clangSerialization
+  clangToolingCore
+  LLVMCore
+  LLVMMCParser
+  LLVMMC
+  LLVMOption
+  rt dl tinfo pthread z m
 )
 
 target_link_libraries (extract-templates 
-
-clangTooling
-clangBasic
-clangASTMatchers
-clangAST
-clangFrontend
-LLVMSupport
-
-rt
-dl
-tinfo
-pthread
-z
-m
+  clangTooling
+  clangBasic
+  clangASTMatchers
+  clangAST
+  clangFrontend
+  LLVMSupport
   )
 
 
