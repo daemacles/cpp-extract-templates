@@ -1,3 +1,4 @@
+#include <string>
 #include <vector>
 
 #include "myclass.hpp"
@@ -35,15 +36,19 @@ int main(int argc, char **argv) {
 
   jim::MyClass<char> mc;
 
-  jim::Baseclass *bc = new jim::Subclass1<float>();
+  using namespace jim;
+  Baseclass *bc = new Subclass1<float>();
   bc->value0_ = 40;
 
   if (argc > 2) {
     mc.value_ = 40;
   }
 
-  std::vector<int> ivec;
+  typedef std::vector<int> IVec;
+  IVec ivec;
   ivec.push_back(10);
+
+  //std::string msg = "hello";
 
   return 0;
 }
